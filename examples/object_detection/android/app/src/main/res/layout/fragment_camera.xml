@@ -31,6 +31,15 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
+    <ImageButton
+        android:id="@+id/flip_camera_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="end|top"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_flip_camera"
+        android:contentDescription="@string/alt_flip_camera_button" />
+
     <include
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/info_bottom_sheet" />

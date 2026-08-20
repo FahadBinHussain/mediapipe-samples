@@ -28,12 +28,14 @@ class MainViewModel : ViewModel() {
         ObjectDetectorHelper.MAX_RESULTS_DEFAULT
     private var _model: Int = ObjectDetectorHelper.MODEL_EFFICIENTDETV2
     private var _beepEnabled: Boolean = true
+    private var _lensFacingBack: Boolean = true
 
     val currentDelegate: Int get() = _delegate
     val currentThreshold: Float get() = _threshold
     val currentMaxResults: Int get() = _maxResults
     val currentModel: Int get() = _model
     val beepEnabled: Boolean get() = _beepEnabled
+    val lensFacingBack: Boolean get() = _lensFacingBack
 
     fun setDelegate(delegate: Int) {
         _delegate = delegate
@@ -53,5 +55,9 @@ class MainViewModel : ViewModel() {
 
     fun setBeepEnabled(enabled: Boolean) {
         _beepEnabled = enabled
+    }
+
+    fun setLensFacingBack(facingBack: Boolean) {
+        _lensFacingBack = facingBack
     }
 }

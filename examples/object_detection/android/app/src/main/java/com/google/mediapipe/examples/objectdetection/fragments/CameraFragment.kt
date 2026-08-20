@@ -157,6 +157,13 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         // Attach listeners to UI control widgets
         initBottomSheetControls()
         fragmentCameraBinding.overlay.setRunningMode(RunningMode.LIVE_STREAM)
+
+        // Flip between front and back camera
+        fragmentCameraBinding.flipCameraButton.setOnClickListener {
+            if (cameraProvider == null) return@setOnClickListener
+            viewModel.setLensFacingBack(!viewModel.lensFacingBack)
+            bindCameraUseCases()
+        }
     }
 
     private fun initBottomSheetControls() {
@@ -298,10 +305,16 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             cameraProvider
                 ?: throw IllegalStateException("Camera initialization failed.")
 
-        // CameraSelector - makes assumption that we're only using the back camera
+        // CameraSelector - selects back camera by default, front camera after flip
         val cameraSelector =
             CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+                .requireLensFacing(
+                    if (viewModel.lensFacingBack) {
+                        CameraSelector.LENS_FACING_BACK
+                    } else {
+                        CameraSelector.LENS_FACING_FRONT
+                    }
+                ).build()
 
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview =

@@ -17,14 +17,18 @@ package com.google.mediapipe.examples.objectdetection
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.SoundPool
 import android.os.SystemClock
 
 /**
- * Plays a short beep when a person is detected. A cooldown prevents a person
+ * Plays a loud siren when a person is detected. A cooldown prevents a person
  * who stays in frame from triggering an endless alarm.
  */
 class PersonAlert(context: Context) {
+
+    private val audioManager =
+        context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
     private val soundPool = SoundPool.Builder()
         .setMaxStreams(1)
@@ -43,6 +47,16 @@ class PersonAlert(context: Context) {
         val now = SystemClock.elapsedRealtime()
         if (now - lastPlayedAt < BEEP_COOLDOWN_MS) return
         lastPlayedAt = now
+
+        // Force the alarm stream to max volume so the siren is as loud as
+        // the device can go, regardless of media volume
+        val maxAlarmVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_ALARM,
+            maxAlarmVolume,
+            AudioManager.FLAG_SHOW_UI
+        )
+
         soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
     }
 
