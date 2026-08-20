@@ -18,24 +18,29 @@ package com.google.mediapipe.examples.objectdetection
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.Ringtone
-import android.media.RingtoneManager
+import android.media.SoundPool
 import android.os.SystemClock
 
 /**
- * Plays the device's default alarm sound when a person is detected. A
- * cooldown prevents a person who stays in frame from triggering an
- * endless alarm.
+ * Plays the bundled radar alarm when a person is detected. A cooldown
+ * prevents a person who stays in frame from triggering an endless alarm.
  */
 class PersonAlert(context: Context) {
 
-    private val appContext = context.applicationContext
     private val audioManager =
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    private val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    private val soundPool = SoundPool.Builder()
+        .setMaxStreams(1)
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+        )
+        .build()
 
+    private val soundId = soundPool.load(context, R.raw.radar_alarm, 1)
     private var lastPlayedAt = 0L
 
     fun trigger() {
@@ -52,17 +57,11 @@ class PersonAlert(context: Context) {
             AudioManager.FLAG_SHOW_UI
         )
 
-        RingtoneManager.getRingtone(appContext, alarmUri)?.let { ringtone ->
-            ringtone.audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
-            ringtone.play()
-        }
+        soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
     }
 
     fun release() {
-        // nothing to release; ringtones are short-lived
+        soundPool.release()
     }
 
     companion object {
