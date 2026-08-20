@@ -73,12 +73,20 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        results?.detections()?.map {
+        val personDetections = results?.detections()
+            ?.filter { detection ->
+                detection.categories().any {
+                    it.categoryName().equals(PERSON_LABEL, ignoreCase = true)
+                }
+            }
+            .orEmpty()
+
+        personDetections.map { detection ->
             val boxRect = RectF(
-                it.boundingBox().left,
-                it.boundingBox().top,
-                it.boundingBox().right,
-                it.boundingBox().bottom
+                detection.boundingBox().left,
+                detection.boundingBox().top,
+                detection.boundingBox().right,
+                detection.boundingBox().bottom
             )
             val matrix = Matrix()
             matrix.postTranslate(-outputWidth / 2f, -outputHeight / 2f)
@@ -96,19 +104,19 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             }
             matrix.mapRect(boxRect)
             boxRect
-        }?.forEachIndexed { index, floats ->
+        }.forEachIndexed { index, floats ->
 
             val top = floats.top * scaleFactor
             val bottom = floats.bottom * scaleFactor
             val left = floats.left * scaleFactor
             val right = floats.right * scaleFactor
 
-            // Draw bounding box around detected objects
+            // Draw bounding box around detected persons
             val drawableRect = RectF(left, top, right, bottom)
             canvas.drawRect(drawableRect, boxPaint)
 
-            // Create text to display alongside detected objects
-            val category = results?.detections()!![index].categories()[0]
+            // Create text to display alongside detected persons
+            val category = personDetections[index].categories()[0]
             val drawableText =
                 category.categoryName() + " " + String.format(
                     "%.2f",
@@ -189,5 +197,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     companion object {
         private const val BOUNDING_RECT_TEXT_PADDING = 8
+        private const val PERSON_LABEL = "person"
     }
 }

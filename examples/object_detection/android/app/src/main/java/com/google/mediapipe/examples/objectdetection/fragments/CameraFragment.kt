@@ -37,9 +37,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import com.google.mediapipe.examples.objectdetection.MainViewModel
 import com.google.mediapipe.examples.objectdetection.ObjectDetectorHelper
+import com.google.mediapipe.examples.objectdetection.PersonAlert
 import com.google.mediapipe.examples.objectdetection.R
 import com.google.mediapipe.examples.objectdetection.databinding.FragmentCameraBinding
 import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetectorResult
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -54,6 +56,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         get() = _fragmentCameraBinding!!
 
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
+    private lateinit var personAlert: PersonAlert
     private val viewModel: MainViewModel by activityViewModels()
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -98,6 +101,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     override fun onDestroyView() {
+        personAlert.release()
         _fragmentCameraBinding = null
         super.onDestroyView()
 
@@ -126,6 +130,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         // Initialize our background executor
         backgroundExecutor = Executors.newSingleThreadExecutor()
+
+        // Beep helper for person-alert sound
+        personAlert = PersonAlert(requireContext())
 
         // Create the ObjectDetectionHelper that will handle the inference
         backgroundExecutor.execute {
@@ -158,6 +165,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             viewModel.currentMaxResults.toString()
         fragmentCameraBinding.bottomSheetLayout.thresholdValue.text =
             String.format("%.2f", viewModel.currentThreshold)
+        fragmentCameraBinding.bottomSheetLayout.beepSwitch.isChecked = viewModel.beepEnabled
+
+        // When toggled, enable/disable the person-detected beep
+        fragmentCameraBinding.bottomSheetLayout.beepSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setBeepEnabled(isChecked)
+        }
 
         // When clicked, lower detection score threshold floor
         fragmentCameraBinding.bottomSheetLayout.thresholdMinus.setOnClickListener {
@@ -358,8 +371,21 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     )
                 }
 
+                // Beep when a person is present in the frame
+                if (viewModel.beepEnabled && hasPerson(detectionResult)) {
+                    personAlert.trigger()
+                }
+
                 // Force a redraw
                 fragmentCameraBinding.overlay.invalidate()
+            }
+        }
+    }
+
+    private fun hasPerson(detectionResult: ObjectDetectorResult): Boolean {
+        return detectionResult.detections().any { detection ->
+            detection.categories().any {
+                it.categoryName().equals("person", ignoreCase = true)
             }
         }
     }

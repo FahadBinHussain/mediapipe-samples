@@ -216,5 +216,27 @@
                 android:entries="@array/models_spinner_titles"/>
 
         </RelativeLayout>
+
+        <!-- Beep on person detected toggle row -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/bottom_sheet_default_row_margin">
+
+            <TextView
+                android:text="@string/label_beep_on_person"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/bottom_sheet_text_size"
+                android:textColor="@color/bottom_sheet_text_color"
+                android:layout_centerVertical="true" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/beep_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.core.widget.NestedScrollView>

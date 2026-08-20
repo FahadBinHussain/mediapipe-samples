@@ -34,6 +34,7 @@
     <string name="label_max_results">Max Results</string>
     <string name="label_delegate">Delegate</string>
     <string name="label_models">ML Model</string>
+    <string name="label_beep_on_person">Beep on Person</string>
     <string name="menu_camera">Camera</string>
     <string name="menu_gallery">Gallery</string>
     <string name="tv_gallery_placeholder">Click + to add an image or a video

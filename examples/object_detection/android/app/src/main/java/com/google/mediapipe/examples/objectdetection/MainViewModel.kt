@@ -26,12 +26,14 @@ class MainViewModel : ViewModel() {
         ObjectDetectorHelper.THRESHOLD_DEFAULT
     private var _maxResults: Int =
         ObjectDetectorHelper.MAX_RESULTS_DEFAULT
-    private var _model: Int = ObjectDetectorHelper.MODEL_EFFICIENTDETV0
+    private var _model: Int = ObjectDetectorHelper.MODEL_EFFICIENTDETV2
+    private var _beepEnabled: Boolean = true
 
     val currentDelegate: Int get() = _delegate
     val currentThreshold: Float get() = _threshold
     val currentMaxResults: Int get() = _maxResults
     val currentModel: Int get() = _model
+    val beepEnabled: Boolean get() = _beepEnabled
 
     fun setDelegate(delegate: Int) {
         _delegate = delegate
@@ -47,5 +49,9 @@ class MainViewModel : ViewModel() {
 
     fun setModel(model: Int) {
         _model = model
+    }
+
+    fun setBeepEnabled(enabled: Boolean) {
+        _beepEnabled = enabled
     }
 }
