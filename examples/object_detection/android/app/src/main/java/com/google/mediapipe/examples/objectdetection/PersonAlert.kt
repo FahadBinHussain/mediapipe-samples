@@ -18,29 +18,24 @@ package com.google.mediapipe.examples.objectdetection
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.SoundPool
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.os.SystemClock
 
 /**
- * Plays a loud siren when a person is detected. A cooldown prevents a person
- * who stays in frame from triggering an endless alarm.
+ * Plays the device's default alarm sound when a person is detected. A
+ * cooldown prevents a person who stays in frame from triggering an
+ * endless alarm.
  */
 class PersonAlert(context: Context) {
 
+    private val appContext = context.applicationContext
     private val audioManager =
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    private val soundPool = SoundPool.Builder()
-        .setMaxStreams(1)
-        .setAudioAttributes(
-            AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
-        )
-        .build()
+    private val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-    private val soundId = soundPool.load(context, R.raw.person_detected, 1)
     private var lastPlayedAt = 0L
 
     fun trigger() {
@@ -48,7 +43,7 @@ class PersonAlert(context: Context) {
         if (now - lastPlayedAt < BEEP_COOLDOWN_MS) return
         lastPlayedAt = now
 
-        // Force the alarm stream to max volume so the siren is as loud as
+        // Force the alarm stream to max volume so the alarm is as loud as
         // the device can go, regardless of media volume
         val maxAlarmVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
         audioManager.setStreamVolume(
@@ -57,11 +52,17 @@ class PersonAlert(context: Context) {
             AudioManager.FLAG_SHOW_UI
         )
 
-        soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+        RingtoneManager.getRingtone(appContext, alarmUri)?.let { ringtone ->
+            ringtone.audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            ringtone.play()
+        }
     }
 
     fun release() {
-        soundPool.release()
+        // nothing to release; ringtones are short-lived
     }
 
     companion object {
